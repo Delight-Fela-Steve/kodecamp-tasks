@@ -1,0 +1,12 @@
+{
+  "name": "week-1-task-solution",
+  "version": "1.0.0",
+  "description": "This is the solution to the first nodejs intermediate task, given by Kodecamp2.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Delight Fela-Steve",
+  "license": "ISC"
+}
