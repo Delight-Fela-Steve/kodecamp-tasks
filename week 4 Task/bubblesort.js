@@ -1,9 +1,9 @@
-const data = [15,14,1,3,4,5,6,-3,-18,67,98,24,7,22,3,3,4,6,10,45]
-let test = [5,8,7,10,12,4] 
+const test1=[ 234, 43, 55, 63, 5, 6, 235, 547 ];
+const test2=[ 1, 4, 2, 5, -2, 3 ];
+const test3=[ 52, 37, 63, 14, 17, 8, 6, 25 ];
 
 
-function bubbleSort(value){
-    let list=value
+function bubbleSort(list){
     /* 
     -The first loop serves as the number of iterations that the inner loop has to go through
     for all elements to be properly checked.
@@ -29,3 +29,10 @@ function bubbleSort(value){
     // The total time complexity for this function is O(n*n)
     return list;
 }
+
+bubbleSort(test1)
+bubbleSort(test2)
+bubbleSort(test3)
+console.log(test1)
+console.log(test2)
+console.log(test3)
