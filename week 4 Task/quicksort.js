@@ -33,7 +33,7 @@ function partition(arr,start,end){
     arr[indexTracker]=arr[end]
     arr[end]=temp2
     //returns the position of the reference point after partitioning
-    // The time complexity for this function is O(nlogn) in best case scenarios and O(n*n) in worst cases
+    // The time complexity for this function is O(nlogn) in best case scenarios and O(n*n) in worst case scenarios
     // The time complexit of O(nlogn) comes about due to the array being halved on each iteration
     return indexTracker;
 }
