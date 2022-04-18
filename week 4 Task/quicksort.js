@@ -1,6 +1,6 @@
-const data = [15,14,1,3,4,5,6,-3,67,98,24,7,22,3,3,4,6,10,45]
-let test = [5,8,7,10,12,4] 
-
+const test1=[ 234, 43, 55, 63, 5, 6, 235, 547 ];
+const test2=[ 1, 4, 2, 5, -2, 3 ];
+const test3=[ 52, 37, 63, 14, 17, 8, 6, 25 ];
 
 
 function quickSort(arr, start, end){
@@ -15,8 +15,8 @@ function quickSort(arr, start, end){
 
 /*
 -This function takes the last element of an array as a refrence point(pivot). 
--It then compares all the values of the array with the reference and divides the array
-into those larger than the reference to the right and those less than the reference to the left
+-It then compares all the values of the array with the reference and sorts the array
+into those less than the reference to the left and those larger than the reference to the right
 */
 function partition(arr,start,end){
     let pivotValue = arr[end]
@@ -35,6 +35,9 @@ function partition(arr,start,end){
     //returns the position of the reference point after partitioning
     return indexTracker;
 }
-
-quickSort(data, 0, data.length-1)
-console.log(data)
+quickSort(test1, 0, test1.length-1)
+quickSort(test2, 0, test2.length-1)
+quickSort(test3, 0, test3.length-1)
+console.log(test1)
+console.log(test2)
+console.log(test3)
