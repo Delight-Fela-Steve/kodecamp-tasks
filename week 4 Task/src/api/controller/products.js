@@ -1,8 +1,20 @@
-const {Products} = require('../models/products')
+const { Products } = require('../models/products')
 const router = require('express').Router()
 
 router.get('/', async function getAllProducts(req,res){
-    const products= await Products.find()
+    const products= await Products.find().sort({'price':1})
+    res.status(200).json(products)
+})
+router.get('/category/:category', async function getAllProducts(req,res){
+    const category = req.params.category
+    query = {'category':{$regex:category, $options:'i'}}
+    const products= await Products.find(query).sort({'price':1})
+    res.status(200).json(products)
+})
+router.get('/name/:name', async function getAllProducts(req,res){
+    const name = req.params.name
+    query = {'name':{$regex:name, $options:'i'}}
+    const products= await Products.find(query).sort({'price':1})
     res.status(200).json(products)
 })
 
