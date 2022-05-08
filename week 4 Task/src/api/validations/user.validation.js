@@ -1,19 +1,14 @@
 const Joi = require('joi');
 
-const user = Joi.object({
-    firstName: Joi.string()
-        .alphanum()
-        .min(3)
-        .max(50),
-        
-    lastName: Joi.string()
-    .alphanum()
-    .min(3)
-    .max(50),
-
-    password: Joi.string()
-        .pattern(new RegExp('^[a-zA-Z0-9]{3,30}$')).required(),
-
-    email: Joi.string()
-        .email({ minDomainSegments: 2, tlds: { allow: ['com'] } }).required()
-})
+exports.userValidation = (user)=>{
+    const userSchema = Joi.object({
+        firstName: Joi.string().min(3).max(50),
+            
+        lastName: Joi.string().min(3).max(50),
+    
+        password: Joi.string().required().pattern(new RegExp('^[a-zA-Z0-9]{3,30}$')),
+    
+        email: Joi.string().required().email({ minDomainSegments: 2, tlds: { allow: ['com'] } })
+    });
+    return userSchema.validate(user)
+}
