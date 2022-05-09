@@ -4,7 +4,7 @@ const userSchema = new mongoose.Schema({
     lastName: String,
     email:{type:String, required:true, immutable:true},
     price: Number,
-    password:{type:String, immutable:true, required:true},
+    password:{type:String, required:true},
     is_deleted:{type:Boolean, default:false}
 },{
     timestamps:true
