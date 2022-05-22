@@ -2,6 +2,7 @@ const { Users } = require('../models/users');
 const router = require('express').Router();
 const {userValidation} = require('../validations/user.validation');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 require('dotenv').config()
 const salt = parseInt(process.env.SALT);
 
@@ -21,18 +22,11 @@ router.post('/register', async function createUser(req,res){
         if(user_exists){
             return res.status(400).json({"message":"email already exists"})
         }else{
-            bcrypt.hash(value.password,salt,(err,hash)=>{
-                 if (err){
-                    return res.status(500).json({msg:"Internal Server Error"})
-                 }else{
-                    value.password = hash;
-                    console.log(value)
-                    const user = new Users(value)
-                    user.save()
-                    return res.status(201).json(user)
-                 }
-            })
-            
+            hashedPassword = await bcrypt.hash(value.password,salt);
+            value.password = hashedPassword;
+            const user = new Users(value)
+            user.save()
+            return res.status(201).json(user)
         }
     }
 })
@@ -42,27 +36,21 @@ router.put('/:id/passwordUpdate', async function updatePassword(req,res){
     oldPassword = req.body.oldPassword;
     newPassword = req.body.newPassword;
     if(oldPassword && newPassword){
-        Users.findById(req.params.id,(err,user)=>{
+        Users.findById(req.params.id, async (err,user)=>{
             if (err){
                 console.log(err)
             }
-            bcrypt.compare(oldPassword,user.password, (err, result)=>{
-                hashedOldPassword= result
-                if(hashedOldPassword){
-                    bcrypt.hash(newPassword,salt,(err,hash)=>{
-                        if (err){
-                           return res.status(500).json({msg:"Internal Server Error"})
-                        }else{
-                           data = {password:hash}
-                           Users.findByIdAndUpdate(req.params.id, data, {new:true},(err,user)=>{
-                               if (err) console.log(err);
-                            return res.status(201).json(user)
-                           })
-                           
-                        }
-                   })
-                }
-            })
+            hashedOldPassword = await bcrypt.compare(oldPassword,user.password); 
+            if(hashedOldPassword){
+                hash = await bcrypt.hash(newPassword,salt)
+                data = {password:hash}
+                Users.findByIdAndUpdate(req.params.id, data, {new:true},(err,user)=>{
+                    if (err) console.log(err);
+                return res.status(201).json(user)
+                })
+            }else{
+                return res.status(400).json({msg:"Invalid credentials"})
+            }
         })
     }else{
         return res.status(400).json({msg:"Invalid credentials"})

@@ -5,6 +5,8 @@ exports.userValidation = (user)=>{
         firstName: Joi.string().min(3).max(50),
             
         lastName: Joi.string().min(3).max(50),
+
+        role: Joi.string().valid(['admin','user']),
     
         password: Joi.string().required().pattern(new RegExp('^[a-zA-Z0-9]{3,30}$')),
     
