@@ -1,6 +1,6 @@
 const { Users } = require('../models/users');
 const router = require('express').Router();
-const {userValidation} = require('../validations/user.validation');
+const {userValidation, loginValidation} = require('../validations/user.validation');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 require('dotenv').config()
@@ -33,7 +33,31 @@ router.post('/register', async function createUser(req,res){
         }
     }
 })
-
+router.post('/login', async function loginUser(req,res){
+    const data = req.body
+    const {error, value} = await loginValidation(data)
+    if (error){
+        return res.status(400).json({msg:error.details[0].message})
+    }
+    else{
+        user_exists = await Users.findOne({email: value.email})
+        if(!user_exists){
+            return res.status(400).json({"message":"Invalid Credentials"})
+        }else{
+            password = await bcrypt.compare(value.password, user_exists.password)
+            if(!password){
+                return res.status(400).json({"message":"Invalid Credentials"})
+            }else{
+                refreshToken = jwt.sign({_id:user._id, role:user.role},process.env.REFRESH_TOKEN_SECRET, {expiresIn:'1d'})
+                accessToken = jwt.sign({_id:user._id, role:user.role},process.env.ACCESS_TOKEN_SECRET, {expiresIn:'15m'})
+                user_exists.refreshToken = refreshToken
+                user_exists.save()
+                return res.cookie('auth_token',refreshToken, {httpOnly:true, maxAge:24*60*60*1000, sameSite:'None', secure:true}).status(200).json({"message":"Log In Successful", data:user_exists, token:accessToken})
+            }
+            
+        }
+    }
+})
 
 router.put('/:id/passwordUpdate', async function updatePassword(req,res){
     oldPassword = req.body.oldPassword;

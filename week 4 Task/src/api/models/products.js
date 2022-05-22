@@ -1,4 +1,5 @@
-const {mongoose, Schema} = require('mongoose');
+const mongoose = require('mongoose');
+//user{type:mongoose.Schema.Types.objectId, ref:'User'}
 const productSchema = new mongoose.Schema({
     name: String,
     description: String,

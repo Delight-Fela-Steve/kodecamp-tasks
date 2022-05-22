@@ -14,3 +14,11 @@ exports.userValidation = (user)=>{
     });
     return userSchema.validate(user)
 }
+
+exports.loginValidation = (user)=>{
+    const loginSchema = Joi.object({
+        email: Joi.string().required().email({ minDomainSegments: 2, tlds: { allow: ['com'] } }),
+        password: Joi.string().required().pattern(new RegExp('^[a-zA-Z0-9]{3,30}$'))
+    });
+    return loginSchema.validate(user)
+}
