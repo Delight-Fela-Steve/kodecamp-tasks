@@ -25,8 +25,11 @@ router.post('/register', async function createUser(req,res){
             hashedPassword = await bcrypt.hash(value.password,salt);
             value.password = hashedPassword;
             const user = new Users(value)
+            refreshToken = jwt.sign({_id:user._id, role:user.role},process.env.REFRESH_TOKEN_SECRET, {expiresIn:'1d'})
+            accessToken = jwt.sign({_id:user._id, role:user.role},process.env.ACCESS_TOKEN_SECRET, {expiresIn:'15m'})
+            user.refreshToken = refreshToken
             user.save()
-            return res.status(201).json(user)
+            return res.cookie('auth_token',refreshToken, {httpOnly:true, maxAge:24*60*60*1000, sameSite:'None', secure:true}).status(201).json({msg:"User Created Successfully", data:user, "token":accessToken});
         }
     }
 })
