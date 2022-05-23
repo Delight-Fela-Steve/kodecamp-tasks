@@ -25,11 +25,11 @@ router.post('/register', async function createUser(req,res){
             hashedPassword = await bcrypt.hash(value.password,salt);
             value.password = hashedPassword;
             const user = new Users(value)
-            refreshToken = jwt.sign({_id:user._id, role:user.role},process.env.REFRESH_TOKEN_SECRET, {expiresIn:'1d'})
-            accessToken = jwt.sign({_id:user._id, role:user.role},process.env.ACCESS_TOKEN_SECRET, {expiresIn:'15m'})
+            refreshToken = jwt.sign({id:user.id, role:user.role},process.env.REFRESH_TOKEN_SECRET, {expiresIn:'1d'})
+            accessToken = jwt.sign({id:user.id, role:user.role},process.env.ACCESS_TOKEN_SECRET, {expiresIn:'15m'})
             user.refreshToken = refreshToken
             user.save()
-            return res.cookie('auth_token',refreshToken, {httpOnly:true, maxAge:24*60*60*1000, sameSite:'None', secure:true}).status(201).json({msg:"User Created Successfully", data:user, "token":accessToken});
+            return res.cookie('jwt',refreshToken, {httpOnly:true, maxAge:24*60*60*1000, sameSite:'None', secure:true}).status(201).json({msg:"User Created Successfully", data:user, "token":accessToken});
         }
     }
 })
@@ -40,7 +40,7 @@ router.post('/login', async function loginUser(req,res){
         return res.status(400).json({msg:error.details[0].message})
     }
     else{
-        user_exists = await Users.findOne({email: value.email})
+        user_exists = await Users.findOne({email: value.email}).select('+password');
         if(!user_exists){
             return res.status(400).json({"message":"Invalid Credentials"})
         }else{
@@ -48,16 +48,36 @@ router.post('/login', async function loginUser(req,res){
             if(!password){
                 return res.status(400).json({"message":"Invalid Credentials"})
             }else{
-                refreshToken = jwt.sign({_id:user._id, role:user.role},process.env.REFRESH_TOKEN_SECRET, {expiresIn:'1d'})
-                accessToken = jwt.sign({_id:user._id, role:user.role},process.env.ACCESS_TOKEN_SECRET, {expiresIn:'15m'})
+                refreshToken = jwt.sign({id:user_exists.id, role:user_exists.role},process.env.REFRESH_TOKEN_SECRET, {expiresIn:'1d'})
+                accessToken = jwt.sign({id:user_exists.id, role:user_exists.role},process.env.ACCESS_TOKEN_SECRET, {expiresIn:'15m'})
                 user_exists.refreshToken = refreshToken
                 user_exists.save()
-                return res.cookie('auth_token',refreshToken, {httpOnly:true, maxAge:24*60*60*1000, sameSite:'None', secure:true}).status(200).json({"message":"Log In Successful", data:user_exists, token:accessToken})
+                return res.cookie('jwt',refreshToken, {httpOnly:true, maxAge:24*60*60*1000, sameSite:'None'}).status(200).json({"message":"Log In Successful", data:user_exists, token:accessToken})
             }
             
         }
     }
 })
+
+router.get('/refresh', async function token_refresh(req,res){
+    const cookie = req.cookies['jwt']
+    if(!cookie){
+        return res.status(400).json({"message":"Not authorized, Sign In"})
+    }else{
+        token = cookie
+        user = await Users.findOne({refreshToken:token})
+        if(!user){
+            return res.status(400).json({"message":"Not authorized, Sign In"})
+        }
+        value = await jwt.decode(token, process.env.REFRESH_TOKEN_SECRET)
+        if(value.id!=user.id){
+            return res.status(400).json({"message":"Invalid Credentials"})
+        }
+        accessToken = jwt.sign({id:user.id, role:user.role},process.env.ACCESS_TOKEN_SECRET, {expiresIn:'15m'})
+        return res.status(200).json({token:accessToken});
+    }
+})
+
 
 router.put('/:id/passwordUpdate', async function updatePassword(req,res){
     oldPassword = req.body.oldPassword;
